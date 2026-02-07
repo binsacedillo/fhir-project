@@ -1,46 +1,62 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 import requests
+import os
 
 app = FastAPI()
 
-# Allow CORS for local frontend
+# Get backend URL from environment for allowed origins
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-FHIR_BASE_URL = "https://hapi.fhir.org/baseR4"
+FHIR_BASE_URL = "https://server.fire.ly"
 
 @app.get("/patient/{patient_id}")
 def get_patient(patient_id: str):
-    url = f"{FHIR_BASE_URL}/Patient/{patient_id}"
-    response = requests.get(url)
-    return response.json()
+    try:
+        url = f"{FHIR_BASE_URL}/Patient/{patient_id}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.get("/allergies/{patient_id}")
 def get_allergies(patient_id: str):
-    url = f"{FHIR_BASE_URL}/AllergyIntolerance?patient={patient_id}"
-    response = requests.get(url)
-    return response.json()
+    try:
+        url = f"{FHIR_BASE_URL}/AllergyIntolerance?patient={patient_id}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.get("/medications/{patient_id}")
 def get_medications(patient_id: str):
-    url = f"{FHIR_BASE_URL}/MedicationStatement?patient={patient_id}"
-    response = requests.get(url)
-    return response.json()
+    try:
+        url = f"{FHIR_BASE_URL}/MedicationStatement?patient={patient_id}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.post("/check-prescription")
 def check_prescription(patient_id: str = Query(...), medication: str = Query(...)):
-    # Fetch allergies
-    allergies_url = f"{FHIR_BASE_URL}/AllergyIntolerance?patient={patient_id}"
-    allergies = requests.get(allergies_url).json()
-    # Simple check: if medication name matches any allergy substance
-    for entry in allergies.get("entry", []):
-        substance = entry["resource"].get("code", {}).get("text", "").lower()
-        if medication.lower() in substance:
-            return {"safe": False, "reason": f"Allergy conflict: {substance}"}
-    return {"safe": True}
+    try:
+        allergies_url = f"{FHIR_BASE_URL}/AllergyIntolerance?patient={patient_id}"
+        allergies = requests.get(allergies_url, timeout=10).json()
+        for entry in allergies.get("entry", []):
+            substance = entry["resource"].get("code", {}).get("text", "").lower()
+            if medication.lower() in substance:
+                return {"safe": False, "reason": f"Allergy conflict: {substance}"}
+        return {"safe": True}
+    except Exception as e:
+        return {"error": str(e)}, 500
