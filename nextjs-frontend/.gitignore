@@ -27,6 +27,8 @@
 # local env files
 .env.local
 .env*.local
+# but keep .env.example for documentation
+!.env.example
 
 # debug
 npm-debug.log*
