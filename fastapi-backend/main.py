@@ -26,6 +26,16 @@ FHIR_BASE_URL = "https://server.fire.ly"
 def root():
     return {"status": "ok", "message": "FHIR API Backend is running"}
 
+@app.get("/search-patients")
+def search_patients(name: str = Query(...)):
+    try:
+        url = f"{FHIR_BASE_URL}/Patient?name={name}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": str(e)}, 500
+
 @app.get("/patient/{patient_id}")
 def get_patient(patient_id: str):
     try:

@@ -19,7 +19,8 @@ export default function PatientDashboard() {
     setError("");
     setSearchResults([]);
     try {
-      const res = await fetch(`https://hapi.fhir.org/baseR4/Patient?name=${encodeURIComponent(name)}`);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API_URL}/search-patients?name=${encodeURIComponent(name)}`);
       const data = await res.json();
       const patients: Patient[] = data.entry?.map((e: { resource: Patient }) => e.resource) || [];
       setSearchResults(patients);
