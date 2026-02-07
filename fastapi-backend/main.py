@@ -13,7 +13,7 @@ app.add_middleware(
     allow_origins=[
         FRONTEND_URL, 
         "http://localhost:3000",
-        "https://fhir-project-five.vercel.app"
+        "https://fhir-project-zeta.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
