@@ -13,14 +13,24 @@ export default function PatientDashboard() {
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
   const [searching, setSearching] = useState(false);
 
-  // FHIR Patient search by name (returns Bundle)
-  async function searchPatients(name: string) {
+  // FHIR Patient search by name or ID (returns Bundle)
+  async function searchPatients(query: string) {
     setSearching(true);
     setError("");
     setSearchResults([]);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const res = await fetch(`${API_URL}/search-patients?name=${encodeURIComponent(name)}`);
+      const params = new URLSearchParams();
+      if (query) {
+        // Simple UUID v4 regex: 8-4-4-4-12 hex digits
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(query.trim())) {
+          params.append("_id", query.trim());
+        } else {
+          params.append("name", query);
+        }
+      }
+      const res = await fetch(`${API_URL}/search-patients?${params.toString()}`);
       const data = await res.json();
       const patients: Patient[] = data.entry?.map((e: { resource: Patient }) => e.resource) || [];
       setSearchResults(patients);
@@ -86,7 +96,7 @@ export default function PatientDashboard() {
                 <input
                   className={styles.formInput}
                   type="text"
-                  placeholder="Search by patient name (e.g. John Smith)"
+                  placeholder="Search by patient name or ID (e.g. John Smith or 4a704b3d...)"
                   value={searchName}
                   onChange={e => setSearchName(e.target.value)}
                 />

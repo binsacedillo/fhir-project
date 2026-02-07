@@ -40,6 +40,7 @@ def search_patients(
     birthdate: str = Query(None, description="Search by birthdate (format: YYYY-MM-DD or ge1990-01-01)"),
     gender: str = Query(None, description="Search by gender (male, female, other, unknown)"),
     identifier: str = Query(None, description="Search by identifier (e.g., SSN, MRN)"),
+    _id: str = Query(None, description="Search by patient ID (e.g., 4a704b3d-5f89-4951-8b83-53b580ff39da)"),
     _count: int = Query(10, description="Number of results per page"),
     _page: int = Query(1, description="Page number for pagination")
 ):
@@ -50,9 +51,10 @@ def search_patients(
     - ?family=Smith&given=John
     - ?birthdate=ge1990-01-01
     - ?gender=male
+    - ?_id=4a704b3d-5f89-4951-8b83-53b580ff39da
     """
     try:
-        params = {"_count": _count, "_page": _page}
+        params = {"_count": _count}
         if name:
             params["name"] = name
         if family:
@@ -65,8 +67,10 @@ def search_patients(
             params["gender"] = gender
         if identifier:
             params["identifier"] = identifier
+        if _id:
+            params["_id"] = _id
         
-        response = requests.get(f"{FHIR_BASE_URL}/Patient", params=params, timeout=10)
+        response = requests.get(f"{FHIR_BASE_URL}/Patient", params=params, timeout=15)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.Timeout:
