@@ -1,0 +1,25 @@
+# Backend
+fastapi-backend/__pycache__/
+fastapi-backend/*.egg-info/
+fastapi-backend/.venv/
+fastapi-backend/venv/
+fastapi-backend/.env
+
+# Frontend
+nextjs-frontend/.next/
+nextjs-frontend/node_modules/
+nextjs-frontend/.env.local
+nextjs-frontend/.env.*.local
+nextjs-frontend/dist/
+nextjs-frontend/out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# OS
+.DS_Store
+Thumbs.db
