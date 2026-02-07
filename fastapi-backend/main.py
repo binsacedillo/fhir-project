@@ -18,6 +18,10 @@ app.add_middleware(
 
 FHIR_BASE_URL = "https://server.fire.ly"
 
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "FHIR API Backend is running"}
+
 @app.get("/patient/{patient_id}")
 def get_patient(patient_id: str):
     try:
